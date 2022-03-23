@@ -1,0 +1,4 @@
+.vscode
+.ipynb_checkpoints
+*jvsc*.ipynb
+resultados.txt

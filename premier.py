@@ -23,10 +23,10 @@ import sys
 
 # PARAMETERS
 # ------------------------------------------------------------------------------
-K: int = 32  # ELO K-factor
+K: int = 36  # ELO K-factor
 N_BETS: int = 380  # Number of bets to simulate
 HTA: int = 150  # Home team advantage
-EV_CUTOFF: float = 1  # Cutoff to place bets on
+EV_CUTOFF: float = 0.6  # Cutoff to place bets on
 FORM_MEMORY: int = 10  # Number of previous matches to remember
 FORM_MULTIPLIER = 12.5
 # ------------------------------------------------------------------------------
@@ -94,23 +94,28 @@ df_teams = pdsql.sqldf(
     "SELECT DISTINCT HomeTeam as TEAM FROM full_df UNION SELECT DISTINCT HomeTeam as TEAM from last_season_ds")
 df_teams["RATING"] = df_teams["H_RATING"] = df_teams["A_RATING"] = 1200
 
-# for index, row in last_season_ds.iterrows():
-#     new_elos: Tuple[int, int] = get_new_elo(df_teams.loc[df_teams["TEAM"] == row["HomeTeam"], "RATING"].values[0],
-#                                             df_teams.loc[df_teams["TEAM"] ==
-#                                                          row["AwayTeam"], "RATING"].values[0],
-#                                             row["FTHG"], row["FTAG"])
-#     new_elos_localia: Tuple[int, int] = get_new_elo(df_teams.loc[df_teams["TEAM"] == row["HomeTeam"], "H_RATING"].values[0],
-#                                                     df_teams.loc[df_teams["TEAM"] ==
-#                                                                  row["AwayTeam"], "A_RATING"].values[0],
-#                                                     row["FTHG"], row["FTAG"])
+for index, row in last_season_ds.iterrows():
+    new_elos: Tuple[int, int] = get_new_elo(df_teams.loc[df_teams["TEAM"] == row["HomeTeam"], "RATING"].values[0],
+                                            df_teams.loc[df_teams["TEAM"] ==
+                                                         row["AwayTeam"], "RATING"].values[0],
+                                            row["FTHG"], row["FTAG"])
+    new_elos_localia: Tuple[int, int] = get_new_elo(df_teams.loc[df_teams["TEAM"] == row["HomeTeam"], "H_RATING"].values[0],
+                                                    df_teams.loc[df_teams["TEAM"] ==
+                                                                 row["AwayTeam"], "A_RATING"].values[0],
+                                                    row["FTHG"], row["FTAG"])
 
-#     df_teams.loc[df_teams["TEAM"] == row["HomeTeam"], "RATING"] = new_elos[0]
-#     df_teams.loc[df_teams["TEAM"] == row["AwayTeam"], "RATING"] = new_elos[1]
+    df_teams.loc[df_teams["TEAM"] == row["HomeTeam"], "RATING"] = new_elos[0]
+    df_teams.loc[df_teams["TEAM"] == row["AwayTeam"], "RATING"] = new_elos[1]
 
-#     df_teams.loc[df_teams["TEAM"] == row["HomeTeam"],
-#                  "H_RATING"] = new_elos_localia[0]
-#     df_teams.loc[df_teams["TEAM"] == row["AwayTeam"],
-#                  "A_RATING"] = new_elos_localia[1]
+    df_teams.loc[df_teams["TEAM"] == row["HomeTeam"],
+                 "H_RATING"] = new_elos_localia[0]
+    df_teams.loc[df_teams["TEAM"] == row["AwayTeam"],
+                 "A_RATING"] = new_elos_localia[1]
+
+for index, row in df_teams.iterrows():
+    df_teams.loc[index, "RATING"] = (row["RATING"] + 1200) / 2
+    df_teams.loc[index, "H_RATING"] = (row["H_RATING"] + 1200) / 2
+    df_teams.loc[index, "A_RATING"] = (row["A_RATING"] + 1200) / 2
 
 # df_teams.head(25)
 
